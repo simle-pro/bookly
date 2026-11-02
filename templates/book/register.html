@@ -1,0 +1,35 @@
+{% extends 'book/base.html' %}
+{% load i18n_tags %}
+
+{% block title %}{% tr 'Регистрация' %}{% endblock %}
+
+{% block content %}
+  <div class="form-box">
+    <h1>{% tr 'Регистрация' %}</h1>
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="alert alert-error">{% for e in form.non_field_errors %}{% tr e %}{% endfor %}</div>
+      {% endif %}
+
+      {% for field in form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">
+            {% if field.name == 'role' %}{% tr 'Я регистрируюсь как' %}
+            {% elif field.name == 'username' %}{% tr 'Логин' %}
+            {% elif field.name == 'password1' %}{% tr 'Пароль' %}
+            {% elif field.name == 'password2' %}{% tr 'Повторите пароль' %}
+            {% else %}{{ field.label }}{% endif %}
+          </label>
+          {{ field }}
+          {% if field.errors %}
+            <div class="field-errors">{% for e in field.errors %}{% tr e %}{% endfor %}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="btn">{% tr 'Зарегистрироваться' %}</button>
+    </form>
+    <p class="muted">{% tr 'Уже есть аккаунт?' %} <a href="{% url 'login' %}">{% tr 'Войти' %}</a></p>
+  </div>
+{% endblock %}

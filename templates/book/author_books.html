@@ -1,0 +1,37 @@
+{% extends 'book/base.html' %}
+{% load i18n_tags %}
+
+{% block title %}{% tr 'Мои книги' %}{% endblock %}
+
+{% block content %}
+  <div class="row-between">
+    <h1>{% tr 'Мои книги' %}</h1>
+    <a href="{% url 'book_add' %}" class="btn">+ {% tr 'Добавить книгу' %}</a>
+  </div>
+
+  {% if books %}
+    <table class="table">
+      <tr>
+        <th>{% tr 'Название' %}</th>
+        <th>{% tr 'Жанр' %}</th>
+        <th>{% tr 'Глав' %}</th>
+        <th>{% tr 'Аудио' %}</th>
+        <th></th>
+      </tr>
+      {% for book in books %}
+        <tr>
+          <td><a href="{% url 'book_detail' book.id %}">{{ book.title }}</a></td>
+          <td>{{ book.genre|default:"—" }}</td>
+          <td>{{ book.chapters.count }}</td>
+          <td>{% if book.audio %}✓{% else %}—{% endif %}</td>
+          <td class="table-actions">
+            <a href="{% url 'book_edit' book.id %}">{% tr 'Ред.' %}</a>
+            <a href="{% url 'book_delete' book.id %}" class="danger">{% tr 'Удал.' %}</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class="muted">{% tr 'Вы ещё не добавили книг.' %}</p>
+  {% endif %}
+{% endblock %}

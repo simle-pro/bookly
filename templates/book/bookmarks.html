@@ -1,0 +1,51 @@
+{% extends 'book/base.html' %}
+{% load i18n_tags %}
+
+{% block title %}{% tr 'Мои закладки' %}{% endblock %}
+
+{% block content %}
+  <div class="row-between">
+    <h1>{% tr 'Мои закладки' %}</h1>
+  </div>
+
+  <div class="form-box" style="margin: 0 0 24px;">
+    <h3>{% tr 'Новый список' %}</h3>
+    <form method="post" class="inline-create">
+      {% csrf_token %}
+      {{ form.name }}
+      {% if form.name.errors %}<div class="field-errors">{% for e in form.name.errors %}{% tr e %}{% endfor %}</div>{% endif %}
+      <button type="submit" class="btn btn-small">{% tr 'Создать' %}</button>
+    </form>
+  </div>
+
+  {% for list in lists %}
+    <div class="bookmark-list">
+      <div class="row-between">
+        <h3>{{ list.name }} <span class="muted">({{ list.bookmarks.count }})</span></h3>
+        <form method="post" action="{% url 'bookmark_list_delete' list.id %}" class="inline-form"
+              data-confirm="{% tr 'Удалить список' %} «{{ list.name}}»?">
+          {% csrf_token %}
+          <button type="submit" class="link-btn danger">{% tr 'удалить список' %}</button>
+        </form>
+      </div>
+
+      {% if list.bookmarks.all %}
+        <ul class="plain-list">
+          {% for bm in list.bookmarks.all %}
+            <li>
+              <a href="{% url 'book_detail' bm.book.id %}">{{ bm.book.title }}</a>
+              <span class="muted">{{ bm.book.author.username }}</span>
+              <form method="post" action="{% url 'bookmark_remove' bm.id %}" class="inline-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="/bookmarks/">
+                <button type="submit" class="link-btn danger">{% tr 'убрать' %}</button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">{% tr 'Пусто. Добавляйте книги со страницы книги.' %}</p>
+      {% endif %}
+    </div>
+  {% endfor %}
+{% endblock %}

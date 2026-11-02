@@ -1,0 +1,75 @@
+{% load static %}
+{% load i18n_tags %}
+<!DOCTYPE html>
+<html lang="{{ LANG }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% tr 'КнигоСайт' %}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="{% static 'js/theme.js' %}"></script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <header class="header">
+    <div class="container header-inner">
+      <a href="{% url 'book_list' %}" class="logo">
+        <span class="logo-icon">📚</span> {% tr 'КнигоСайт' %}
+      </a>
+
+      <form action="{% url 'book_list' %}" method="get" class="search-form">
+        <input type="text" name="q" placeholder="{% tr 'Поиск книги или автора…  (Ctrl+K)' %}"
+               value="{{ query|default:'' }}">
+        <button type="submit">{% tr 'Найти' %}</button>
+      </form>
+
+      <div class="lang-switch" title="{% tr 'Язык' %}">
+        {% for code, name in LANGS %}
+          <a href="{% url 'set_lang' code %}"
+             class="lang-btn {% if LANG == code %}active{% endif %}">{{ code|upper }}</a>
+        {% endfor %}
+      </div>
+
+      <button class="burger" type="button" aria-label="Menu">☰</button>
+
+      <button id="theme-btn" class="tool-btn theme-btn" type="button"
+              onclick="toggleTheme()" title="{% tr 'Сменить тему' %}">🌙</button>
+
+      <nav class="nav">
+        {% if user.is_authenticated %}
+          <a href="{% url 'notifications' %}" class="nav-msg">
+            💬 {% tr 'Сообщения' %}{% if unread_count %} <span class="badge">{{ unread_count }}</span>{% endif %}
+          </a>
+          <a href="{% url 'bookmarks' %}">🔖 {% tr 'Закладки' %}</a>
+          {% if user.profile.is_author %}
+            <a href="{% url 'author_books' %}">✍️ {% tr 'Мои книги' %}</a>
+          {% endif %}
+          <a href="{% url 'profile' %}" class="nav-user">{{ user.username }}</a>
+          <form action="{% url 'logout' %}" method="post" class="inline-form">
+            {% csrf_token %}
+            <button type="submit" class="link-btn">{% tr 'Выйти' %}</button>
+          </form>
+        {% else %}
+          <a href="{% url 'login' %}">{% tr 'Вход' %}</a>
+          <a href="{% url 'register' %}" class="btn btn-small">{% tr 'Регистрация' %}</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="container page-fade">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    {% tr 'КнигоСайт — читай и слушай книги онлайн' %} · {% now "Y" %}
+  </footer>
+
+  <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

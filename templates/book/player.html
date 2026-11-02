@@ -1,0 +1,20 @@
+{% extends 'book/base.html' %}
+{% load i18n_tags %}
+
+{% block title %}{% tr 'Слушать' %}: {{ book.title }}{% endblock %}
+
+{% block content %}
+  <div class="player-page">
+    <h1>{{ book.title }}</h1>
+    <p class="muted">{% tr 'Аудиокнига' %} · {{ book.author.username }}</p>
+
+    <div class="player-disc paused">🎧</div>
+
+    <audio controls class="audio-player">
+      <source src="{{ book.audio.url }}" type="audio/mpeg">
+      {% tr 'Ваш браузер не поддерживает аудио.' %}
+    </audio>
+
+    <p><a href="{% url 'book_detail' book.id %}">← {% tr 'Назад к книге' %}</a></p>
+  </div>
+{% endblock %}

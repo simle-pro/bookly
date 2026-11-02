@@ -1,0 +1,23 @@
+{% extends 'book/base.html' %}
+{% load i18n_tags %}
+
+{% block title %}{% tr 'Вход' %}{% endblock %}
+
+{% block content %}
+  <div class="form-box">
+    <h1>{% tr 'Вход' %}</h1>
+    <form method="post">
+      {% csrf_token %}
+      <div class="field">
+        <label for="username">{% tr 'Логин' %}</label>
+        <input type="text" name="username" id="username" required>
+      </div>
+      <div class="field">
+        <label for="password">{% tr 'Пароль' %}</label>
+        <input type="password" name="password" id="password" required>
+      </div>
+      <button type="submit" class="btn">{% tr 'Войти' %}</button>
+    </form>
+    <p class="muted">{% tr 'Нет аккаунта?' %} <a href="{% url 'register' %}">{% tr 'Регистрация' %}</a></p>
+  </div>
+{% endblock %}

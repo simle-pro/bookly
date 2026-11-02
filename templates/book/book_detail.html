@@ -1,0 +1,107 @@
+{% extends 'book/base.html' %}
+{% load i18n_tags %}
+
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block content %}
+  <div class="book-detail">
+    <div class="book-detail-cover">
+      {% if book.cover %}
+        <img src="{{ book.cover.url }}" alt="{{ book.title }}">
+      {% else %}
+        <span class="cover-placeholder big">📖</span>
+      {% endif %}
+    </div>
+
+    <div class="book-detail-info">
+      <h1>{{ book.title }}</h1>
+      <p class="muted">{% tr 'Автор' %}: {{ book.author.username }}</p>
+      {% if book.genre %}<span class="tag">{{ book.genre }}</span>{% endif %}
+
+      <div class="rating-line">
+        {% if book.average_rating %}
+          <span class="stars big">★ {{ book.average_rating }}</span>
+          <span class="muted">({{ book.rating_count }} {% tr 'оценок' %})</span>
+        {% else %}
+          <span class="muted">{% tr 'Пока нет оценок' %}</span>
+        {% endif %}
+      </div>
+
+      {% if book.description %}
+        <p class="description">{{ book.description }}</p>
+      {% endif %}
+
+      <div class="actions">
+        <a href="{% url 'book_read' book.id %}" class="btn btn-big">{% tr 'Читать' %}</a>
+        {% if book.audio %}
+          <a href="{% url 'book_listen' book.id %}" class="btn btn-big btn-alt">{% tr 'Слушать' %}</a>
+        {% endif %}
+      </div>
+
+      {% if user.is_authenticated %}
+        <div class="rate-box">
+          <h3>{% tr 'В закладки' %}</h3>
+          <form action="{% url 'bookmark_add' book.id %}" method="post" class="bookmark-form">
+            {% csrf_token %}
+            <select name="list_id">
+              {% for list in user.bookmark_lists.all %}
+                <option value="{{ list.id }}">{{ list.name }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-small">{% tr 'Добавить' %}</button>
+          </form>
+          {% for bm in book.bookmarks.all %}
+            {% if bm.list.user == user %}
+              <form action="{% url 'bookmark_remove' bm.id %}" method="post" class="inline-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button type="submit" class="link-btn danger">✕ {% tr 'в' %} «{{ bm.list.name }}»</button>
+              </form>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="rate-box">
+          <h3>{% if user_rating %}{% tr 'Ваша оценка' %}: <span class="stars">★ {{ user_rating.value }}</span>{% else %}{% tr 'Поставить оценку' %}{% endif %}</h3>
+          <form action="{% url 'book_rate' book.id %}" method="post">
+            {% csrf_token %}
+            <div class="star-rating">
+              {% for i in "54321" %}
+                <input type="radio" name="value" id="star{{ i }}" value="{{ i }}"
+                       {% if user_rating and user_rating.value == i|add:0 %}checked{% endif %}>
+                <label for="star{{ i }}" title="{{ i }}">★</label>
+              {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-small">{% tr 'Оценить' %}</button>
+          </form>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <section class="comments">
+    <h2>{% tr 'Комментарии' %} ({{ comments|length }})</h2>
+
+    {% if user.is_authenticated %}
+      <form action="{% url 'book_comment' book.id %}" method="post" class="comment-form">
+        {% csrf_token %}
+        {{ comment_form.text }}
+        <button type="submit" class="btn btn-small">{% tr 'Отправить' %}</button>
+      </form>
+    {% else %}
+      <p class="muted"><a href="{% url 'login' %}">{% tr 'Войдите' %}</a>, {% tr 'чтобы оставить комментарий.' %}</p>
+    {% endif %}
+
+    {% for comment in comments %}
+      <div class="comment">
+        <div class="comment-head">
+          <strong>{{ comment.user.username }}</strong>
+          <span class="muted">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+        </div>
+        <p>{{ comment.text }}</p>
+      </div>
+    {% empty %}
+      <p class="muted">{% tr 'Комментариев пока нет.' %}</p>
+    {% endfor %}
+  </section>
+{% endblock %}

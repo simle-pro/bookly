@@ -1,0 +1,79 @@
+{% extends 'book/base.html' %}
+{% load i18n_tags %}
+
+{% block title %}{% tr 'Чтение' %}: {{ book.title }}{% endblock %}
+
+{% block content %}
+  <div class="reader-top">
+    <a href="{% url 'book_detail' book.id %}">← {{ book.title }}</a>
+
+    <div class="reader-modes">
+      <a href="?chapter={{ chapter.id|default:'' }}"
+         class="mode-btn {% if mode != 'all' %}active{% endif %}">📑 {% tr 'По главам' %}</a>
+      <a href="?mode=all"
+         class="mode-btn {% if mode == 'all' %}active{% endif %}">📜 {% tr 'Сплошной' %}</a>
+    </div>
+  </div>
+
+  {% if not chapters %}
+    <p class="muted">{% tr 'В этой книге пока нет глав.' %}</p>
+
+  {% elif mode == 'all' %}
+    {# ---------- Сплошной режим: всё сразу ---------- #}
+    <div class="reader">
+      <aside class="reader-chapters">
+        <h3>{% tr 'Содержание' %}</h3>
+        <ul>
+          {% for s in chapters %}
+            <li><a href="#ch-{{ s.id }}">{{ s.number }}. {{ s.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </aside>
+
+      <article class="reader-text">
+        <h2 class="book-title-all">{{ book.title }}</h2>
+        {% for s in sections %}
+          <section class="chapter-block" id="ch-{{ s.chapter.id }}">
+            <h2>{{ s.chapter.title }}</h2>
+            {% for paragraph in s.paragraphs %}
+              <p>{{ paragraph }}</p>
+            {% endfor %}
+          </section>
+        {% endfor %}
+      </article>
+    </div>
+
+  {% else %}
+    {# ---------- Режим по главам ---------- #}
+    <div class="reader">
+      <aside class="reader-chapters">
+        <h3>{% tr 'Главы' %}</h3>
+        <ul>
+          {% for c in chapters %}
+            <li {% if c.id == chapter.id %}class="active"{% endif %}>
+              <a href="?chapter={{ c.id }}">{{ c.number }}. {{ c.title }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </aside>
+
+      <article class="reader-text">
+        <h2>{{ chapter.title }}</h2>
+        {% for paragraph in paragraphs %}
+          <p>{{ paragraph }}</p>
+        {% endfor %}
+
+        <div class="reader-nav">
+          {% if prev_chapter %}
+            <a href="?chapter={{ prev_chapter.id }}" class="btn">← {% tr 'Пред.' %}</a>
+          {% else %}
+            <span></span>
+          {% endif %}
+          {% if next_chapter %}
+            <a href="?chapter={{ next_chapter.id }}" class="btn">{% tr 'След.' %} →</a>
+          {% endif %}
+        </div>
+      </article>
+    </div>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'book/base.html' %}
+{% load i18n_tags %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+  <div class="form-box wide">
+    <h1>{{ title }}</h1>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">
+            {% if field.name == 'title' %}{% tr 'Название' %}
+            {% elif field.name == 'description' %}{% tr 'Описание' %}
+            {% elif field.name == 'genre' %}{% tr 'Жанр' %}
+            {% elif field.name == 'cover' %}{% tr 'Обложка' %}
+            {% elif field.name == 'audio' %}{% tr 'Аудио (mp3)' %}
+            {% else %}{{ field.label }}{% endif %}
+          </label>
+          {{ field }}
+          {% if field.errors %}<div class="field-errors">{% for e in field.errors %}{% tr e %}{% endfor %}</div>{% endif %}
+        </div>
+      {% endfor %}
+
+      <div class="field">
+        <label>{% tr 'Файл .txt или .docx (разбивается на главы)' %}</label>
+        {{ txt_form.txt_file }}
+        {% if txt_form.txt_file.errors %}<div class="field-errors">{% for e in txt_form.txt_file.errors %}{% tr e %}{% endfor %}</div>{% endif %}
+        <small class="muted">{% tr 'Главы ищутся по строкам «Глава 1», «Глава 2»… или «# …». Форматы: .txt и .docx' %}</small>
+      </div>
+
+      <button type="submit" class="btn">{% tr 'Сохранить' %}</button>
+      <a href="{% url 'author_books' %}" class="muted">← {% tr 'Назад' %}</a>
+    </form>
+  </div>
+
+  {% if book %}
+    <div class="form-box wide">
+      <h2>{% tr 'Главы' %} ({{ chapters|length }})</h2>
+
+      <form method="post" action="{% url 'chapter_add' book.id %}" class="chapter-add">
+        {% csrf_token %}
+        {{ chapter_form.title }}
+        {{ chapter_form.text }}
+        <button type="submit" class="btn btn-small">+ {% tr 'Добавить главу' %}</button>
+      </form>
+
+      <ul class="chapter-list">
+        {% for c in chapters %}
+          <li>
+            <span>{{ c.number }}. {{ c.title }}</span>
+            <form method="post" action="{% url 'chapter_delete' book.id c.id %}" class="inline-form"
+                  data-confirm="{% tr 'Удалить главу' %} «{{ c.title }}»?">
+              {% csrf_token %}
+              <button type="submit" class="link-btn danger">{% tr 'удалить' %}</button>
+            </form>
+          </li>
+        {% empty %}
+          <li class="muted">{% tr 'Глав пока нет — загрузите txt или добавьте вручную.' %}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+{% endblock %}

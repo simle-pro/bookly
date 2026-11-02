@@ -1,0 +1,16 @@
+{% extends 'book/base.html' %}
+{% load i18n_tags %}
+
+{% block title %}{% tr 'Удалить книгу' %}{% endblock %}
+
+{% block content %}
+  <div class="form-box">
+    <h1>{% tr 'Удалить книгу?' %}</h1>
+    <p>{% tr 'и все её главы, оценки и комментарии будут удалены безвозвратно.' %}</p>
+    <form method="post" data-confirm="{% tr 'Удалить книгу' %} «{{ book.title }}» {% tr 'безвозвратно?' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">{% tr 'Да, удалить' %}</button>
+      <a href="{% url 'author_books' %}">{% tr 'Отмена' %}</a>
+    </form>
+  </div>
+{% endblock %}

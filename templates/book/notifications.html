@@ -1,0 +1,36 @@
+{% extends 'book/base.html' %}
+{% load i18n_tags %}
+
+{% block title %}{% tr 'Сообщения' %}{% endblock %}
+
+{% block content %}
+  <div class="row-between">
+    <h1>{% tr 'Сообщения' %}</h1>
+    {% if unread %}
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-small">{% tr 'Отметить всё прочитанным' %}</button>
+      </form>
+    {% endif %}
+  </div>
+
+  {% if unread %}
+    <p class="muted">{% tr 'Непрочитанных' %}: {{ unread }}</p>
+  {% endif %}
+
+  {% for item in items %}
+    <div class="notification {% if not item.is_read %}unread{% endif %}">
+      <div class="notification-text">
+        {% if item.chapter %}
+          <a href="{% url 'book_read' item.book.id %}?chapter={{ item.chapter.id }}">{% tr_notify item %}</a>
+        {% else %}
+          <a href="{% url 'book_detail' item.book.id %}">{% tr_notify item %}</a>
+        {% endif %}
+        <div class="muted">{{ item.created_at|date:"d.m.Y H:i" }}</div>
+      </div>
+      {% if not item.is_read %}<span class="dot"></span>{% endif %}
+    </div>
+  {% empty %}
+    <p class="muted">{% tr 'Сообщений пока нет. Добавьте книгу в закладки — и вам придёт уведомление о новых главах.' %}</p>
+  {% endfor %}
+{% endblock %}
